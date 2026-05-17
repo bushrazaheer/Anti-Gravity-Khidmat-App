@@ -1,181 +1,178 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import React from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { initGemini, hasGeminiKey } from '../engine/gemini';
+import { agent, clearTraces } from '../engine/AntigravityAgent';
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+export default function ExploreScreen() {
+  const [apiKey, setApiKey] = useState('');
+  const [isConfigured, setIsConfigured] = useState(hasGeminiKey());
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
+  const handleSaveKey = () => {
+    if (apiKey.trim().length > 10) {
+      initGemini(apiKey.trim());
+      setIsConfigured(true);
+      Alert.alert('Success', 'Gemini API Key configured successfully!');
+    } else {
+      Alert.alert('Error', 'Please enter a valid API key.');
+    }
   };
-  const theme = useTheme();
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+  const handleSimulateDispute = () => {
+    agent.simulateDispute();
+  };
+
+  const handleClearLogs = () => {
+    clearTraces();
+  };
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Antigravity Dashboard</Text>
+          <Text style={styles.subtitle}>Configure AI Orchestrator Settings</Text>
+        </View>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>1. API Integration</Text>
+          <Text style={styles.description}>
+            To enable real LLM intent parsing, provide your Google Gemini API key. Without it, the app uses a simulated heuristic engine.
+          </Text>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="AIzaSy..."
+              value={apiKey}
+              onChangeText={setApiKey}
+              secureTextEntry
+            />
+            <TouchableOpacity 
+              style={[styles.saveButton, isConfigured && styles.saveButtonSuccess]} 
+              onPress={handleSaveKey}
+            >
+              <Text style={styles.saveButtonText}>
+                {isConfigured ? 'Update Key' : 'Save Key'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {isConfigured && (
+            <Text style={styles.statusText}>✅ Gemini API is active</Text>
+          )}
+        </View>
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>2. Edge Case Simulations</Text>
+          <Text style={styles.description}>
+            Trigger specific scenarios to test the orchestrator's fallback and dispute handling workflows.
+          </Text>
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+          <TouchableOpacity style={styles.actionButton} onPress={handleSimulateDispute}>
+            <Text style={styles.actionButtonText}>Simulate Post-Service Dispute</Text>
+          </TouchableOpacity>
+        </View>
 
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>3. Debugging</Text>
+          <TouchableOpacity style={[styles.actionButton, styles.dangerButton]} onPress={handleClearLogs}>
+            <Text style={styles.actionButtonText}>Clear Agent Traces</Text>
+          </TouchableOpacity>
+        </View>
 
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
   container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: '#F9FAFB',
   },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+  content: {
+    padding: 16,
+    paddingBottom: 80, // Space for trace panel
   },
-  centerText: {
-    textAlign: 'center',
+  header: {
+    marginBottom: 24,
   },
-  pressed: {
-    opacity: 0.7,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#111827',
   },
-  linkButton: {
+  subtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  section: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  inputContainer: {
     flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
+    alignItems: 'center',
+    gap: 8,
+  },
+  input: {
+    flex: 1,
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#F9FAFB',
+  },
+  saveButton: {
+    backgroundColor: '#3B82F6',
+    height: 44,
+    paddingHorizontal: 16,
     justifyContent: 'center',
-    gap: Spacing.one,
+    borderRadius: 8,
+  },
+  saveButtonSuccess: {
+    backgroundColor: '#10B981',
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  statusText: {
+    color: '#10B981',
+    fontSize: 12,
+    marginTop: 8,
+    fontWeight: '600',
+  },
+  actionButton: {
+    backgroundColor: '#111827',
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 8,
   },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+  dangerButton: {
+    backgroundColor: '#EF4444',
   },
-  collapsibleContent: {
-    alignItems: 'center',
-  },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
-  },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });
