@@ -124,16 +124,65 @@ class RoutingAgent {
     const lower = input.toLowerCase();
     let serviceType = '';
     
-    if (lower.includes('ac') || lower.includes('cooling') || lower.includes('thanda')) serviceType = 'AC Repair';
-    else if (lower.includes('bijli') || lower.includes('light') || lower.includes('electrician') || lower.includes('wire')) serviceType = 'Electrician';
-    else if (lower.includes('pani') || lower.includes('plumber') || lower.includes('leak') || lower.includes('pipe') || lower.includes('motor')) serviceType = 'Plumber';
-    else if (lower.includes('gari') || lower.includes('car') || lower.includes('mechanic') || lower.includes('start nahi')) serviceType = 'Mechanic';
-    else if (lower.includes('wood') || lower.includes('carpenter') || lower.includes('lakri') || lower.includes('darwaza')) serviceType = 'Carpenter';
-    else if (lower.includes('clean') || lower.includes('safai') || lower.includes('cleaner') || lower.includes('maid')) serviceType = 'House Cleaner';
-    else if (lower.includes('paint') || lower.includes('rang') || lower.includes('colour') || lower.includes('painter')) serviceType = 'Painter';
+    if (lower.includes('ac') || lower.includes('cooling') || lower.includes('thanda') || lower.includes('اے سی') || lower.includes('اےسی') || lower.includes('کولنگ') || lower.includes('ٹھنڈا')) serviceType = 'AC Repair';
+    else if (lower.includes('bijli') || lower.includes('light') || lower.includes('electrician') || lower.includes('wire') || lower.includes('بجلی') || lower.includes('الیکٹریشن') || lower.includes('تار') || lower.includes('لائٹ')) serviceType = 'Electrician';
+    else if (lower.includes('pani') || lower.includes('plumber') || lower.includes('leak') || lower.includes('pipe') || lower.includes('motor') || lower.includes('پلمبر') || lower.includes('پانی') || lower.includes('لیک') || lower.includes('پائپ') || lower.includes('موٹر')) serviceType = 'Plumber';
+    else if (lower.includes('wood') || lower.includes('carpenter') || lower.includes('lakri') || lower.includes('darwaza') || lower.includes('کارپینٹر') || lower.includes('بڑھئی') || lower.includes('لکڑی') || lower.includes('دروازہ')) serviceType = 'Carpenter';
+    else if (lower.includes('gari') || /\bcar\b/i.test(lower) || lower.includes('mechanic') || lower.includes('start nahi') || lower.includes('میکینک') || lower.includes('گاڑی') || lower.includes('کار')) serviceType = 'Mechanic';
+    else if (lower.includes('clean') || lower.includes('safai') || lower.includes('cleaner') || lower.includes('maid') || lower.includes('صفائی') || lower.includes('خادمہ') || lower.includes('صاف')) serviceType = 'House Cleaner';
+    else if (lower.includes('paint') || lower.includes('rang') || lower.includes('colour') || lower.includes('painter') || lower.includes('پینٹر') || lower.includes('رنگ') || lower.includes('رنگساز')) serviceType = 'Painter';
 
     let urgency: 'high'|'medium'|'low' = 'medium';
     if (lower.includes('urgent') || lower.includes('abhi') || lower.includes('fori') || lower.includes('nahi kar raha') || lower.includes('jaldi') || lower.includes('emergency')) urgency = 'high';
+
+    let isGreeting = false;
+    let isThanks = false;
+    let isOk = false;
+
+    if (!serviceType) {
+      if (
+        lower.includes('asalam') || 
+        lower.includes('salam') || 
+        lower.includes('hi') || 
+        lower.includes('hello') || 
+        lower.includes('hey') || 
+        lower.includes('aao') || 
+        lower.includes('وعلیکم') || 
+        lower.includes('السلام') ||
+        lower.includes('ہیلو') ||
+        lower.includes('سلام')
+      ) {
+        isGreeting = true;
+      }
+      else if (
+        lower.includes('thank') || 
+        lower.includes('shukriya') || 
+        lower.includes('shukria') || 
+        lower.includes('jazak') || 
+        lower.includes('شکریہ') || 
+        lower.includes('جزاک') || 
+        lower.includes('مہربانی')
+      ) {
+        isThanks = true;
+      }
+      else if (
+        lower.includes('ok') || 
+        lower.includes('okay') || 
+        lower.includes('theek') || 
+        lower.includes('haan') || 
+        lower.includes('yes') || 
+        lower.includes('ji ') || 
+        lower.trim() === 'ji' || 
+        lower.includes('ٹھیک') || 
+        lower.includes('جی ') || 
+        lower.trim() === 'جی' || 
+        lower.includes('ہاں')
+      ) {
+        isOk = true;
+      }
+    }
+
+    const isPleasantry = isGreeting || isThanks || isOk;
 
     return {
       serviceType: serviceType || 'Unknown',
@@ -142,9 +191,12 @@ class RoutingAgent {
       preferredTime: lower.includes('kal') ? 'Tomorrow' : 'Asap',
       priceSensitivity: lower.includes('budget') || lower.includes('sasta') || lower.includes('cheap') ? 'high' : 'medium',
       confidenceScore: serviceType ? 85 : 10,
-      needsClarification: !serviceType,
-      clarificationMessage: !serviceType ? 'Maazrat, kya aap bata sakte hain aapko konsi service chahiye? (Carpenter, Painter, House Cleaner, Plumber, AC Repair, Electrician)' : undefined,
-      language: 'Mixed'
+      needsClarification: !serviceType && !isPleasantry,
+      clarificationMessage: !serviceType && !isPleasantry ? 'Maazrat, kya aap bata sakte hain aapko konsi service chahiye? (Carpenter, Painter, House Cleaner, Plumber, AC Repair, Electrician)' : undefined,
+      language: 'Mixed',
+      isGreeting,
+      isThanks,
+      isOk
     };
   }
 }

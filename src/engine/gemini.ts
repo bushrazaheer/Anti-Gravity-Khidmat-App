@@ -35,6 +35,9 @@ export interface ParsedIntent {
   needsClarification: boolean;
   clarificationMessage?: string;
   language: string;
+  isGreeting?: boolean;
+  isThanks?: boolean;
+  isOk?: boolean;
 }
 
 export const parseIntentWithAI = async (userInput: string): Promise<ParsedIntent> => {

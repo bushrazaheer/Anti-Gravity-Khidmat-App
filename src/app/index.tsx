@@ -29,8 +29,151 @@ interface Message {
 
 type AuthMode = 'login' | 'reg_cnic' | 'reg_details' | 'reg_otp' | 'reg_password' | 'chat';
 
+const serviceTranslations: Record<string, Record<'roman_urdu' | 'english' | 'urdu', string>> = {
+  'AC Repair': {
+    roman_urdu: 'AC Repair',
+    english: 'AC Repair',
+    urdu: 'اے سی سروس'
+  },
+  'Electrician': {
+    roman_urdu: 'Electrician',
+    english: 'Electrician',
+    urdu: 'الیکٹریشن'
+  },
+  'Plumber': {
+    roman_urdu: 'Plumber',
+    english: 'Plumber',
+    urdu: 'پلمبر'
+  },
+  'Carpenter': {
+    roman_urdu: 'Carpenter',
+    english: 'Carpenter',
+    urdu: 'کارپینٹر'
+  },
+  'Mechanic': {
+    roman_urdu: 'Mechanic',
+    english: 'Mechanic',
+    urdu: 'میکینک'
+  },
+  'House Cleaner': {
+    roman_urdu: 'House Cleaner',
+    english: 'House Cleaner',
+    urdu: 'خادمہ / صفائی'
+  },
+  'Painter': {
+    roman_urdu: 'Painter',
+    english: 'Painter',
+    urdu: 'پینٹر'
+  }
+};
+
+const translations: Record<'roman_urdu' | 'english' | 'urdu', {
+  welcomeMessage: (name: string, city: string) => string;
+  clarifyMessage: string;
+  confirmLocation: (serviceType: string) => string;
+  proximityApology: (location: string, serviceType: string) => string;
+  matchingIntro: (score: number) => string;
+  selectDate: (providerName: string) => string;
+  noSlotsToday: string;
+  selectTimeSlot: (providerName: string, dateOption: string) => string;
+  bookingSuccess: (providerName: string, date: string, slot: string) => string;
+  whatsappText: (name: string, mobile: string, serviceType: string, providerName: string, date: string, slot: string, location: string, total: number) => string;
+  reminderText: (providerName: string, serviceType: string) => string;
+  greetingResponse: string;
+  thanksResponse: string;
+  okResponse: string;
+}> = {
+  roman_urdu: {
+    welcomeMessage: (name: string, city: string) => `Assalam o Alaikum, ${name}! Khidmat 24/7 AI Service Orchestrator me aapka khush amdeed.\n\nAapki profile successfully login ho chuki hai. Registered shehar: ${city}.\n\nAaj aapko kis kisam ki service chahiye? (e.g. "I need a Carpenter", "House Cleaner chahiye", "Painter jaldi bheinjein")`,
+    clarifyMessage: 'Maazrat, kya aap thoda wazeh kar sakte hain ke aapko kya service chahiye?',
+    confirmLocation: (serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.roman_urdu || serviceType;
+      return `[Booking Agent] Aapki request ${trans} ke liye hai. Please service ki location confirm karein:`;
+    },
+    proximityApology: (location: string, serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.roman_urdu || serviceType;
+      return `Maazrat, hum bohot sharminda hain par aapke bataye hue location "${location}" me abhi hamara koi ${trans} dastyab nahi hai. Insha'Allah hum jald hi aapke area me apni services shuru karenge!`;
+    },
+    matchingIntro: (score: number) => `Humne aapke location ke mutabiq providers dhoond liye hain (AI Match Confidence: ${score}%):`,
+    selectDate: (providerName: string) => `[Booking Agent] Please select your preferred arrival Date for ${providerName}:`,
+    noSlotsToday: `[Booking Agent] Maazrat, aaj ke din ke liye ab koi time slot available nahi hai (minimum 2 hours advance booking ki zaroorat hai).\n\nPlease select another date from the options above or schedule for tomorrow/day after.`,
+    selectTimeSlot: (providerName: string, dateOption: string) => `[Booking Agent] Please select your preferred arrival time slot for ${providerName} on ${dateOption}:`,
+    bookingSuccess: (providerName: string, date: string, slot: string) => `🎉 Shabaash! Aapki booking ${providerName} ke sath confirm ho chuki hai for ${date} (${slot}).\n\n✅ WhatsApp message aur status details bhej diye gaye hain.`,
+    whatsappText: (name: string, mobile: string, serviceType: string, providerName: string, date: string, slot: string, location: string, total: number) => {
+      const trans = serviceTranslations[serviceType]?.roman_urdu || serviceType;
+      return `🟢 WhatsApp Confirmation\nTo: ${name} (${mobile})\nYour Khidmat booking for ${trans} with ${providerName} is confirmed for ${date} at ${slot} at ${location}. Total: Rs ${total}.`;
+    },
+    reminderText: (providerName: string, serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.roman_urdu || serviceType;
+      return `🔔 Khidmat Notification (1hr before)\nReminder: ${providerName} (${trans}) is scheduled to arrive at your address in 1 hour!`;
+    },
+    greetingResponse: 'Wa Alaikum Assalam! Mai Khidmat AI Assistant hoon. Aapko aaj kya service chahiye? (AC Repair, Electrician, Plumber, Carpenter, House Cleaner, Painter)',
+    thanksResponse: 'Bohot shukriya! Agar aapko koi aur service chahiye to zaroor batayein. Khidmat 24/7 hamesha aapke sath hai!',
+    okResponse: 'Ji bilkul! Please batayein mai aapki kya madad kar sakta hoon?'
+  },
+  english: {
+    welcomeMessage: (name: string, city: string) => `Assalam o Alaikum, ${name}! Welcome to Khidmat 24/7 AI Service Orchestrator.\n\nYour profile has been logged in successfully. Registered City: ${city}.\n\nWhat service do you need today? (e.g. "I need a Carpenter", "House Cleaner chahiye", "Painter jaldi bheinjein")`,
+    clarifyMessage: 'We apologize, could you please clarify what service you require?',
+    confirmLocation: (serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.english || serviceType;
+      return `[Booking Agent] Your request is for ${trans}. Please confirm your service location:`;
+    },
+    proximityApology: (location: string, serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.english || serviceType;
+      return `We apologize, but there are no operational ${trans}s available at your specified location "${location}". God willing, we will expand our services to your area soon!`;
+    },
+    matchingIntro: (score: number) => `We found providers matching your location (AI Match Confidence: ${score}%):`,
+    selectDate: (providerName: string) => `[Booking Agent] Please select your preferred arrival Date for ${providerName}:`,
+    noSlotsToday: `[Booking Agent] We apologize, there are no more slots available for today (minimum 2 hours advance booking required).\n\nPlease select another date from the options above or schedule for tomorrow/day after.`,
+    selectTimeSlot: (providerName: string, dateOption: string) => `[Booking Agent] Please select your preferred arrival time slot for ${providerName} on ${dateOption}:`,
+    bookingSuccess: (providerName: string, date: string, slot: string) => `🎉 Success! Your booking with ${providerName} has been confirmed for ${date} (${slot}).\n\n✅ WhatsApp confirmation and status details have been dispatched.`,
+    whatsappText: (name: string, mobile: string, serviceType: string, providerName: string, date: string, slot: string, location: string, total: number) => {
+      const trans = serviceTranslations[serviceType]?.english || serviceType;
+      return `🟢 WhatsApp Confirmation\nTo: ${name} (${mobile})\nYour Khidmat booking for ${trans} with ${providerName} is confirmed for ${date} at ${slot} at ${location}. Total: Rs ${total}.`;
+    },
+    reminderText: (providerName: string, serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.english || serviceType;
+      return `🔔 Khidmat Notification (1hr before)\nReminder: ${providerName} (${trans}) is scheduled to arrive at your address in 1 hour!`;
+    },
+    greetingResponse: 'Hello! I am your Khidmat AI Assistant. What service do you need today? (AC Repair, Electrician, Plumber, Carpenter, House Cleaner, Painter)',
+    thanksResponse: 'You are very welcome! Let me know if you need any other service. Khidmat 24/7 is always here for you!',
+    okResponse: 'Perfect! Please let me know how I can help you today.'
+  },
+  urdu: {
+    welcomeMessage: (name: string, city: string) => `السلام علیکم، ${name}! خدمت 24/7 اے آئی سروس آرکیسٹریٹر میں آپ کا خوش آمدید۔\n\nآپ کا پروفائل کامیابی کے ساتھ لاگ ان ہو چکا ہے۔ رجسٹرڈ شہر: ${city}۔\n\nآپ کو آج کس قسم کی سروس چاہیے؟ (مثال کے طور پر: "مجھے کارپینٹر چاہیے"، "ہاؤس کلینر بھیجیں")`,
+    clarifyMessage: 'معذرت، کیا آپ تھوڑا واضح کر سکتے ہیں کہ آپ کو کیا سروس چاہیے؟',
+    confirmLocation: (serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.urdu || serviceType;
+      return `[بکنگ ایجنٹ] آپ کی درخواست ${trans} کے لیے ہے۔ براہ کرم سروس کی لوکیشن کی تصدیق کریں:`;
+    },
+    proximityApology: (location: string, serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.urdu || serviceType;
+      return `معذرت، ہم بہت شرمندہ ہیں لیکن آپ کی بتائی ہوئی لوکیشن "${location}" میں ابھی ہمارا کوئی ${trans} دستیاب نہیں ہے۔ ان شاء اللہ ہم جلد ہی آپ کے علاقے میں اپنی سروسز شروع کریں گے!`;
+    },
+    matchingIntro: (score: number) => `ہم نے آپ کی لوکیشن کے مطابق سروس فراہم کنندگان تلاش کر لیے ہیں (AI میچ اعتمادی سکور: ${score}٪):`,
+    selectDate: (providerName: string) => `[بکنگ ایجنٹ] براہ کرم ${providerName} کے لیے اپنی پسندیدہ آمد کی تاریخ منتخب کریں:`,
+    noSlotsToday: `[بکنگ ایجنٹ] معذرت، آج کے دن کے لیے اب کوئی ٹائم سلاٹ دستیاب نہیں ہے (کم از کم 2 گھنٹے پہلے بکنگ لازمی ہے)۔\n\nبراہ کرم اوپر دیے گئے اختیارات میں سے کوئی دوسری تاریخ منتخب کریں یا کل/پرسوں کے لیے شیڈول کریں۔`,
+    selectTimeSlot: (providerName: string, dateOption: string) => `[بکنگ ایجنٹ] براہ کرم ${dateOption} کو ${providerName} کے لیے اپنی پسندیدہ آمد کا ٹائم سلاٹ منتخب کریں:`,
+    bookingSuccess: (providerName: string, date: string, slot: string) => `🎉 مبارک ہو! ${providerName} کے ساتھ آپ کی بکنگ ${date} (${slot}) کے لیے کنفرم ہو چکی ہے۔\n\n✅ واٹس ایپ پیغام اور اسٹیٹس کی تفصیلات بھیج دی گئی ہیں۔`,
+    whatsappText: (name: string, mobile: string, serviceType: string, providerName: string, date: string, slot: string, location: string, total: number) => {
+      const trans = serviceTranslations[serviceType]?.urdu || serviceType;
+      return `🟢 واٹس ایپ تصدیق\nبنام: ${name} (${mobile})\nآپ کی خدمت بکنگ برائے ${trans} ہمراہ ${providerName} تاریخ ${date} بوقت ${slot} بمقام ${location} کنفرم ہو گئی ہے۔ کل رقم: روپے ${total}۔`;
+    },
+    reminderText: (providerName: string, serviceType: string) => {
+      const trans = serviceTranslations[serviceType]?.urdu || serviceType;
+      return `🔔 خدمت الرٹ (1 گھنٹہ پہلے)\nیاددہانی: ${providerName} (${trans}) 1 گھنٹے میں آپ کے پتے پر پہنچ رہے ہیں!`;
+    },
+    greetingResponse: 'وعلیکم السلام! میں خدمت اے آئی اسسٹنٹ ہوں۔ آج آپ کو کیا سروس چاہیے؟ (اے سی سروس، الیکٹریشن، پلمبر، کارپینٹر، خادمہ / صفائی، پینٹر)',
+    thanksResponse: 'بہت شکریہ! اگر آپ کو کسی اور سروس کی ضرورت ہو تو ضرور بتائیں۔ خدمت 24/7 ہمیشہ آپ کے ساتھ ہے!',
+    okResponse: 'جی بالکل! براہ کرم بتائیں میں آپ کی کیا مدد کر سکتا ہوں؟'
+  }
+};
+
 export default function HomeScreen() {
   const [authMode, setAuthMode] = useState<AuthMode>('login'); // Default is Login
+
+  // --- CHAT LANGUAGE STATE ---
+  const [chatLanguage, setChatLanguage] = useState<'roman_urdu' | 'english' | 'urdu'>('roman_urdu');
 
   // --- LOGIN STATE ---
   const [loginCnic, setLoginCnic] = useState('');
@@ -79,15 +222,35 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (userProfile && authMode === 'chat') {
+      const welcomeText = translations[chatLanguage].welcomeMessage(userProfile.name, userProfile.city);
       setMessages([
         { 
           id: 'm1', 
           sender: 'bot', 
-          text: `Assalam o Alaikum, ${userProfile.name}! Khidmat 24/7 AI Service Orchestrator me aapka khush amdeed.\n\nAapki profile successfully login ho chuki hai. registered shehar: ${userProfile.city}.\n\nAaj aapko kis kisam ki service chahiye? (e.g. "I need a Carpenter", "House Cleaner chahiye", "Painter jaldi bheinjein")` 
+          text: welcomeText
         }
       ]);
     }
   }, [userProfile, authMode]);
+
+  const handleLanguageChange = (lang: 'roman_urdu' | 'english' | 'urdu') => {
+    setChatLanguage(lang);
+    
+    let ackText = '';
+    if (lang === 'roman_urdu') {
+      ackText = 'Theek hai, ab se mai aap se Roman Urdu me guftagu karunga!';
+    } else if (lang === 'english') {
+      ackText = 'Sure, I will communicate with you in English from now on!';
+    } else if (lang === 'urdu') {
+      ackText = 'ٹھیک ہے، اب سے میں آپ سے اردو میں بات کروں گا۔';
+    }
+
+    setMessages(prev => [...prev, {
+      id: 'lang_ack_' + Date.now(),
+      sender: 'bot',
+      text: ackText
+    }]);
+  };
 
   // Clear registration errors when switching steps
   useEffect(() => {
@@ -329,8 +492,22 @@ export default function HomeScreen() {
     const intent = await agent.processRequest(input);
     setMessages(prev => prev.filter(m => m.id !== typingId));
 
+    // Handle Pleasantries/Extra Natural Words conversationally
+    if (intent.isGreeting) {
+      setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'bot', text: translations[chatLanguage].greetingResponse }]);
+      return;
+    }
+    if (intent.isThanks) {
+      setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'bot', text: translations[chatLanguage].thanksResponse }]);
+      return;
+    }
+    if (intent.isOk) {
+      setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'bot', text: translations[chatLanguage].okResponse }]);
+      return;
+    }
+
     if (intent.needsClarification) {
-      setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'bot', text: intent.clarificationMessage || 'Maazrat, kya aap thoda wazeh kar sakte hain?' }]);
+      setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'bot', text: translations[chatLanguage].clarifyMessage }]);
       return;
     }
 
@@ -347,7 +524,7 @@ export default function HomeScreen() {
     setMessages(prev => [...prev, {
       id: 'loc_' + Date.now(),
       sender: 'bot',
-      text: `[Booking Agent] Aapki request ${intent.serviceType} ke liye hai. Please service ki location confirm karein:`,
+      text: translations[chatLanguage].confirmLocation(intent.serviceType),
       type: 'location_select',
       options: locationOptions
     }]);
@@ -407,13 +584,13 @@ export default function HomeScreen() {
         setMessages(prev => [...prev, { 
           id: Date.now().toString(), 
           sender: 'bot', 
-          text: `Maazrat, hum bohot sharminda hain par aapke bataye hue location "${location}" me abhi hamara koi ${currentIntent.serviceType} dastyab nahi hai. Insha'Allah hum jald hi aapke area me apni services shuru karenge!` 
+          text: translations[chatLanguage].proximityApology(location, currentIntent.serviceType) 
         }]);
       } else {
         setMessages(prev => [...prev, { 
           id: Date.now().toString(), 
           sender: 'bot', 
-          text: `Humne aapke location ke mutabiq providers dhoond liye hain (AI Match Confidence: ${currentIntent.confidenceScore}%):`,
+          text: translations[chatLanguage].matchingIntro(currentIntent.confidenceScore),
           providers: matches
         }]);
       }
@@ -442,7 +619,7 @@ export default function HomeScreen() {
     setMessages(prev => [...prev, {
       id: 'date_' + Date.now(),
       sender: 'bot',
-      text: `[Booking Agent] Please select your preferred arrival Date for ${provider.provider.name}:`,
+      text: translations[chatLanguage].selectDate(provider.provider.name),
       type: 'date_select',
       options: [todayStr, tomStr, dayAfterStr]
     }]);
@@ -491,13 +668,13 @@ export default function HomeScreen() {
         setMessages(prev => [...prev, {
           id: 'time_fail_' + Date.now(),
           sender: 'bot',
-          text: `[Booking Agent] Maazrat, aaj ke din ke liye ab koi time slot available nahi hai (minimum 2 hours advance booking ki zaroorat hai).\n\nPlease select another date from the options above or schedule for tomorrow/day after.`,
+          text: translations[chatLanguage].noSlotsToday,
         }]);
       } else {
         setMessages(prev => [...prev, {
           id: 'time_' + Date.now(),
           sender: 'bot',
-          text: `[Booking Agent] Please select your preferred arrival time slot for ${selectedProvider?.provider.name} on ${dateOption}:`,
+          text: translations[chatLanguage].selectTimeSlot(selectedProvider?.provider.name || '', dateOption),
           type: 'timeslot_select',
           options: availableSlots
         }]);
@@ -527,20 +704,29 @@ export default function HomeScreen() {
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         sender: 'bot',
-        text: `🎉 Shabaash! Aapki booking ${selectedProvider.provider.name} ke sath confirm ho chuki hai for ${selectedDate} (${slot}).\n\n✅ WhatsApp message aur status details bhej diye gaye hain.`
+        text: translations[chatLanguage].bookingSuccess(selectedProvider.provider.name, selectedDate, slot)
       }]);
 
       // WhatsApp Message Mock
       setWhatsappBanner({
         visible: true,
-        text: `🟢 WhatsApp Confirmation\nTo: ${userProfile.name} (${userProfile.mobile})\nYour Khidmat booking for ${currentIntent.serviceType} with ${selectedProvider.provider.name} is confirmed for ${selectedDate} at ${slot} at ${selectedLocation}. Total: Rs ${selectedProvider.quote.total}.`
+        text: translations[chatLanguage].whatsappText(
+          userProfile.name,
+          userProfile.mobile,
+          currentIntent.serviceType,
+          selectedProvider.provider.name,
+          selectedDate,
+          slot,
+          selectedLocation,
+          selectedProvider.quote.total
+        )
       });
 
       // 1hr Push Notification Mock
       setTimeout(() => {
         setPushNotification({
           visible: true,
-          text: `🔔 Khidmat Notification (1hr before)\nReminder: ${selectedProvider.provider.name} (${currentIntent.serviceType}) is scheduled to arrive at your address in 1 hour!`
+          text: translations[chatLanguage].reminderText(selectedProvider.provider.name, currentIntent.serviceType)
         });
       }, 3500);
 
@@ -570,17 +756,43 @@ export default function HomeScreen() {
       )}
 
       <LinearGradient colors={['#064E3B', '#065F46']} style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.logoIcon}>🌙</Text>
-          <Text style={styles.headerTitle}>Khidmat 24/7</Text>
-          <View style={styles.aiBadge}>
-            <Text style={styles.aiBadgeText}>AI</Text>
+        <View style={styles.headerTopLine}>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logoIcon}>🌙</Text>
+            <Text style={styles.headerTitle}>Khidmat 24/7</Text>
+            <View style={styles.aiBadge}>
+              <Text style={styles.aiBadgeText}>AI</Text>
+            </View>
           </View>
+          {authMode !== 'chat' && (
+            <View style={styles.onlineBadge}>
+              <View style={styles.onlineDot} />
+              <Text style={styles.onlineText}>Antigravity Active</Text>
+            </View>
+          )}
         </View>
-        <View style={styles.onlineBadge}>
-          <View style={styles.onlineDot} />
-          <Text style={styles.onlineText}>Antigravity Active</Text>
-        </View>
+        
+        {authMode === 'chat' && (
+          <View style={styles.languageSelectorContainer}>
+            {(['roman_urdu', 'english', 'urdu'] as const).map(lang => (
+              <TouchableOpacity
+                key={lang}
+                style={[
+                  styles.langBtn,
+                  chatLanguage === lang && styles.langBtnActive
+                ]}
+                onPress={() => handleLanguageChange(lang)}
+              >
+                <Text style={[
+                  styles.langBtnText,
+                  chatLanguage === lang && styles.langBtnTextActive
+                ]}>
+                  {lang === 'roman_urdu' ? '🇵🇰 Roman' : lang === 'english' ? '🇺🇸 English' : '🕌 اردو'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </LinearGradient>
 
       {authMode !== 'chat' && (
@@ -1529,5 +1741,46 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 12,
     textAlign: 'center',
+  },
+  headerTopLine: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  languageSelectorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(2, 44, 34, 0.6)',
+    borderRadius: 20,
+    padding: 3,
+    marginTop: 12,
+    width: '100%',
+    maxWidth: 320,
+    borderWidth: 1,
+    borderColor: 'rgba(52, 211, 153, 0.2)',
+  },
+  langBtn: {
+    flex: 1,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  langBtnActive: {
+    backgroundColor: '#059669',
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  langBtnText: {
+    color: '#A7F3D0',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  langBtnTextActive: {
+    color: '#FFFFFF',
   }
 });
