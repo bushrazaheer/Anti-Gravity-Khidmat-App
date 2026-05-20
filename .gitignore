@@ -43,3 +43,6 @@ app-example
 /ios
 /android
 Antigravity_Logs.zip
+*.zip
+logs/
+*.log
