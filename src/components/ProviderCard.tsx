@@ -29,7 +29,14 @@ export const ProviderCard = ({ match, isTop, onBook }: Props) => {
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.avatarContainer}>
-              <Image source={{ uri: provider.avatar }} style={styles.avatar} />
+              <Image 
+                source={{ 
+                  uri: provider.name.toLowerCase().includes('sadia') || provider.name.toLowerCase().includes('kiran')
+                    ? `https://avatar.iran.liara.run/public/girl?username=${encodeURIComponent(provider.name)}`
+                    : `https://avatar.iran.liara.run/public/boy?username=${encodeURIComponent(provider.name)}`
+                }} 
+                style={styles.avatar} 
+              />
             </View>
             <View style={styles.headerInfo}>
               <Text style={[styles.name, isTop && styles.textLight]}>{provider.name}</Text>

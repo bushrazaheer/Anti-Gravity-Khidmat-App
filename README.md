@@ -10,21 +10,22 @@ This app fulfills all mandatory requirements of **Challenge 2: AI Service Orches
 
 The system is built on **React Native (Expo)** with a custom `AntigravityOrchestrator` acting as the brain.
 
-### Agentic Workflow (Antigravity Role)
-1. **Understand (Intent Parsing):** Captures noisy input (Urdu, Roman Urdu, English) via chat. Uses Google Gemini API (or a fallback heuristic engine) to extract `serviceType`, `urgency`, `location`, and `priceSensitivity`.
-2. **Match (6-Factor Ranking Engine):** Filters available providers and ranks them based on:
-   - Distance/Travel time
-   - Rating / Reviews
-   - Reliability Score
-   - Cancellation Risk
-   - Price Matching
-   - Urgency Optimization
-3. **Decide:** Recommends the highest-scoring provider, logging *why* they were chosen (e.g., choosing a slightly farther provider because of higher reliability).
-4. **Price:** Generates a dynamic quote adding base fee, distance cost, and urgency surge.
-5. **Act (Booking Simulation):** Updates the UI to simulate booking confirmation and en-route status.
-6. **Evaluate & Adapt (Dispute Handling):** Simulates handling post-service quality disputes (triggering a partial refund based on reliability history).
+### Agents Developed & Workflow (Antigravity Role)
+1. **Intent Parsing Agent:** Captures noisy input (Urdu, Roman Urdu, English) via chat. Uses Google Gemini API (or a fallback heuristic engine) to extract `serviceType`, `urgency`, `location`, and `priceSensitivity`.
+2. **Matching & Pricing Agent:** Filters available providers and ranks them based on 6 factors (Distance, Rating, Reliability, Cancellation Risk, Price Matching, Urgency). Generates a dynamic quote adding base fee, distance cost, surge, and loyalty discounts.
+3. **Recovery & Collision Agent:** Detects slot overlaps or waitlists and automatically re-routes users to alternate dates or providers.
+4. **Dispute & Escalation Agent:** Simulates handling post-service quality disputes (triggering partial refunds, updating provider reliability scores, blacklisting, or escalating to human support).
 
 > **Important:** All orchestrator decisions are logged explicitly in the **Agent Trace Panel** (Slide-up menu), fulfilling the 20% Antigravity integration requirement.
+
+---
+
+## 🔗 Integrations & Mock APIs Used
+
+- **NADRA Mock Database:** Simulates CNIC verification for user onboarding and retrieves exact geographic coordinates/addresses for routing.
+- **WhatsApp Green API / CallMeBot:** Simulates real-time omnichannel push notifications during Booking Confirmations and Cancellations.
+- **Google Gemini API:** Natural language understanding and translation engine for conversational flow.
+- **Time-Travel Mock Service:** Simulates the progression of a booking (Confirmed -> En Route -> In Progress -> Completed) inside a simulated lifecycle.
 
 ---
 

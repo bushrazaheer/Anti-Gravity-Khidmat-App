@@ -12,6 +12,9 @@ export interface Provider {
   baseRateHourly: number; // PKR
   isAvailable: boolean;
   avatar: string;
+  experienceYears?: number;
+  certifications?: string[];
+  specializations?: string[];
 }
 
 export const providers: Provider[] = [
@@ -32,7 +35,10 @@ export const providers: Provider[] = [
     cancellationRate: 2,
     baseRateHourly: 1500,
     isAvailable: true,
-    avatar: 'https://i.pravatar.cc/150?u=aliraza'
+    avatar: 'https://i.pravatar.cc/150?u=aliraza',
+    experienceYears: 8,
+    certifications: ['HVAC Certified', 'SDA Diploma'],
+    specializations: ['Compressor Overhaul', 'Smart Wiring']
   },
   {
     id: 'p_isb_ac2',
@@ -47,7 +53,10 @@ export const providers: Provider[] = [
     cancellationRate: 15,
     baseRateHourly: 1200,
     isAvailable: true,
-    avatar: 'https://i.pravatar.cc/150?u=musman'
+    avatar: 'https://i.pravatar.cc/150?u=musman',
+    experienceYears: 2,
+    certifications: ['Basic AC Maintenance'],
+    specializations: ['Filter Cleaning']
   },
   {
     id: 'p_isb_ac3',
@@ -62,7 +71,10 @@ export const providers: Provider[] = [
     cancellationRate: 4,
     baseRateHourly: 1400,
     isAvailable: true,
-    avatar: 'https://i.pravatar.cc/150?u=hamzashah'
+    avatar: 'https://i.pravatar.cc/150?u=hamzashah',
+    experienceYears: 4,
+    certifications: ['DAE Electrical'],
+    specializations: ['General AC Service']
   },
   // Electrician
   {
@@ -78,7 +90,10 @@ export const providers: Provider[] = [
     cancellationRate: 2,
     baseRateHourly: 900,
     isAvailable: true,
-    avatar: 'https://i.pravatar.cc/150?u=jahangir'
+    avatar: 'https://i.pravatar.cc/150?u=jahangir',
+    experienceYears: 10,
+    certifications: ['NESPAK Certified', 'Safety Specialist'],
+    specializations: ['Commercial Wiring', 'Overload Protection']
   },
   {
     id: 'p_isb_el2',
@@ -93,7 +108,10 @@ export const providers: Provider[] = [
     cancellationRate: 1,
     baseRateHourly: 1000,
     isAvailable: true,
-    avatar: 'https://i.pravatar.cc/150?u=kamran'
+    avatar: 'https://i.pravatar.cc/150?u=kamran',
+    experienceYears: 12,
+    certifications: ['Master Plumber', 'Safety First'],
+    specializations: ['Main Sewer Leakage', 'Drain Unblocking']
   },
   // Plumber
   {
@@ -857,29 +875,29 @@ export const NadraDatabase: Record<string, NadraRecord> = {
   '37405-1234567-1': {
     cnic: '37405-1234567-1',
     name: 'Muhammad Imran',
-    mobile: '0300-1234567',
+    mobile: '03312933020',
     city: 'Islamabad',
     address: 'House 45, Street 12, Sector F-11/3, Islamabad',
     motherMaidenName: 'Kausar Bibi',
-    registeredMobile: '0300-1234567'
+    registeredMobile: '03312933020'
   },
   '35201-7654321-2': {
     cnic: '35201-7654321-2',
     name: 'Aisha Bibi',
-    mobile: '0321-7654321',
+    mobile: '03312933020',
     city: 'Lahore',
     address: 'House 112, Block J, Gulberg III, Lahore',
     motherMaidenName: 'Zainab Begum',
-    registeredMobile: '0321-7654321'
+    registeredMobile: '03312933020'
   },
   '42201-9876543-3': {
     cnic: '42201-9876543-3',
     name: 'Syed Ali',
-    mobile: '0333-9876543',
+    mobile: '03312933020',
     city: 'Karachi',
     address: 'Flat 4B, Clifton View Apartments, Clifton Block 5, Karachi',
     motherMaidenName: 'Fatima Shah',
-    registeredMobile: '0333-9876543'
+    registeredMobile: '03312933020'
   }
 };
 
@@ -901,7 +919,7 @@ export const RegisteredUsers: Record<string, UserCredential> = {
     cnic: '37405-1234567-1',
     password: '123', // Simple password for quick testing
     name: 'Muhammad Imran',
-    mobile: '0300-1234567',
+    mobile: '03312933020',
     city: 'Islamabad',
     primaryAddress: 'House 45, Street 12, Sector F-11/3, Islamabad',
     secondaryAddress1: 'Office - Blue Area, Islamabad'
@@ -910,7 +928,7 @@ export const RegisteredUsers: Record<string, UserCredential> = {
     cnic: '35201-7654321-2',
     password: '123',
     name: 'Aisha Bibi',
-    mobile: '0321-7654321',
+    mobile: '03312933020',
     city: 'Lahore',
     primaryAddress: 'House 112, Block J, Gulberg III, Lahore',
     secondaryAddress1: 'Office - Mall Road, Lahore'
@@ -919,7 +937,7 @@ export const RegisteredUsers: Record<string, UserCredential> = {
     cnic: '42201-9876543-3',
     password: '123',
     name: 'Syed Ali',
-    mobile: '0333-9876543',
+    mobile: '03312933020',
     city: 'Karachi',
     primaryAddress: 'Flat 4B, Clifton View Apartments, Clifton Block 5, Karachi',
     secondaryAddress1: 'Office - Clifton, Karachi'

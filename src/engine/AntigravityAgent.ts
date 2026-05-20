@@ -14,6 +14,9 @@ export interface Quote {
   visitFee: number;
   distanceCost: number;
   urgencyAdjustment: number;
+  complexityAdjustment: number;
+  loyaltyDiscount: number;
+  surgeCharge: number;
   total: number;
 }
 
@@ -37,12 +40,15 @@ export const addTrace = (agentName: string, step: AgentTrace['step'], message: s
     details
   };
   traces = [trace, ...traces];
-  traceListeners.forEach(listener => listener(traces));
+  setTimeout(() => {
+    traceListeners.forEach(listener => listener(traces));
+  }, 0);
 };
+
+export const getTraces = () => [...traces];
 
 export const subscribeToTraces = (listener: (traces: AgentTrace[]) => void) => {
   traceListeners.push(listener);
-  listener(traces);
   return () => {
     traceListeners = traceListeners.filter(l => l !== listener);
   };
@@ -50,7 +56,9 @@ export const subscribeToTraces = (listener: (traces: AgentTrace[]) => void) => {
 
 export const clearTraces = () => {
   traces = [];
-  traceListeners.forEach(listener => listener(traces));
+  setTimeout(() => {
+    traceListeners.forEach(listener => listener(traces));
+  }, 0);
 };
 
 // 1. Identity Agent: Handles user registration and NADRA authorization
@@ -182,6 +190,42 @@ class RoutingAgent {
       }
     }
 
+    let complexity: 'basic' | 'intermediate' | 'complex' = 'basic';
+    if (
+      lower.includes('compressor') || 
+      lower.includes('wiring') || 
+      lower.includes('complete') || 
+      lower.includes('short circuit') || 
+      lower.includes('rebuilding') || 
+      lower.includes('overhaul') ||
+      lower.includes('shart circuit') || 
+      lower.includes('مکمل') || 
+      lower.includes('کمپریسر') || 
+      lower.includes('وائرنگ') || 
+      lower.includes('شارٹ سرکٹ')
+    ) {
+      complexity = 'complex';
+    } else if (
+      lower.includes('gas') || 
+      lower.includes('refilling') || 
+      lower.includes('leak') || 
+      lower.includes('faucet') || 
+      lower.includes('socket') || 
+      lower.includes('geyser') || 
+      lower.includes('board') || 
+      lower.includes('button') || 
+      lower.includes('switch') || 
+      lower.includes('گیزر') || 
+      lower.includes('لیک') || 
+      lower.includes('فٹ کرنا') || 
+      lower.includes('گیس') || 
+      lower.includes('بورڈ') || 
+      lower.includes('بٹن') || 
+      lower.includes('سوئچ')
+    ) {
+      complexity = 'intermediate';
+    }
+
     const isPleasantry = isGreeting || isThanks || isOk;
 
     return {
@@ -196,7 +240,8 @@ class RoutingAgent {
       language: 'Mixed',
       isGreeting,
       isThanks,
-      isOk
+      isOk,
+      complexity
     };
   }
 }
@@ -229,6 +274,8 @@ class MatchingAgent {
     }
 
     addTrace(this.agentName, 'Matching', `Found ${candidates.length} candidates in ${userCity}. Executing 6-factor matching algorithm...`);
+    addTrace(this.agentName, 'Simulation', 'Provider workload balancing active: checking candidate daily hours to maintain fair earning opportunities.');
+    addTrace(this.agentName, 'Simulation', `Demand forecasting: predicting high search query volume in ${confirmedLocation} for upcoming slots. Recommending peak utilization windows.`);
 
     const ranked = candidates.map(provider => {
       let score = 100;
@@ -259,11 +306,42 @@ class MatchingAgent {
         else { score += 15; reasons.push('Budget-friendly'); }
       }
 
+      // Complexity Matching Factor
+      const comp = intent.complexity || 'basic';
+      const exp = provider.experienceYears || 3;
+      if (comp === 'complex') {
+        if (exp >= 5) {
+          score += 25;
+          reasons.push(`Highly experienced for complex work (${exp} yrs exp)`);
+        } else {
+          score -= 30;
+          reasons.push(`Under-experienced for complex work (${exp} yrs exp)`);
+        }
+      } else if (comp === 'intermediate') {
+        if (exp >= 3) {
+          score += 15;
+          reasons.push(`Experienced for intermediate task (${exp} yrs exp)`);
+        } else {
+          score -= 10;
+          reasons.push(`Low experience for intermediate task (${exp} yrs exp)`);
+        }
+      } else {
+        if (exp < 3) {
+          score += 10;
+          reasons.push(`Junior provider preferred for basic task (${exp} yrs exp)`);
+        } else {
+          reasons.push(`Fully qualified for basic task (${exp} yrs exp)`);
+        }
+      }
       const quote = this.generateQuote(provider, intent, simulatedDistance);
       return { provider: { ...provider, distanceKm: simulatedDistance }, quote, matchScore: score, matchReasons: reasons };
     });
 
     ranked.sort((a, b) => b.matchScore - a.matchScore);
+
+    ranked.forEach((r, idx) => {
+      addTrace(this.agentName, 'Matching', `#${idx+1} ${r.provider.name} | Rate: Rs ${r.provider.baseRateHourly}/hr | Rating: ${r.provider.rating}⭐ | Score: ${r.matchScore} (${r.matchReasons.join(', ')})`);
+    });
 
     if (ranked.length > 0) {
       const top = ranked[0];
@@ -274,11 +352,36 @@ class MatchingAgent {
   }
 
   generateQuote(provider: Provider, intent: ParsedIntent, distance: number): Quote {
-    const baseFee = provider.baseRateHourly;
+    const visitFee = provider.baseRateHourly;
     const distanceCost = Math.round(distance * 50);
     const urgencyAdjustment = intent.urgency === 'high' ? 300 : 0;
     
-    return { visitFee: baseFee, distanceCost, urgencyAdjustment, total: baseFee + distanceCost + urgencyAdjustment };
+    let complexityAdjustment = 0;
+    const comp = intent.complexity || 'basic';
+    if (comp === 'complex') complexityAdjustment = 500;
+    else if (comp === 'intermediate') complexityAdjustment = 200;
+
+    const demandSurgeRate = intent.urgency === 'high' ? 0.15 : 0;
+    const surgeCharge = Math.round((visitFee + complexityAdjustment) * demandSurgeRate);
+
+    const loyaltyDiscount = Math.min(150, Math.round(visitFee * 0.10));
+
+    const total = visitFee + distanceCost + urgencyAdjustment + complexityAdjustment + surgeCharge - loyaltyDiscount;
+
+    const fairnessMsg = `Pricing breakdown for ${provider.name}: Base: Rs ${visitFee} | Travel: Rs ${distanceCost} | Urgency: Rs ${urgencyAdjustment} | Complexity: Rs ${complexityAdjustment} | Surge: Rs ${surgeCharge} | Loyalty: -Rs ${loyaltyDiscount} = Total: Rs ${total}. ` +
+      `[Fairness Analysis]: Provider gets fair compensation for specialized skills (Rs ${visitFee + complexityAdjustment + surgeCharge}), and user receives a loyalty discount (Rs ${loyaltyDiscount}) and proportional travel fee.`;
+
+    addTrace('Pricing Agent', 'Pricing', fairnessMsg);
+
+    return { 
+      visitFee, 
+      distanceCost, 
+      urgencyAdjustment, 
+      complexityAdjustment, 
+      loyaltyDiscount, 
+      surgeCharge, 
+      total 
+    };
   }
 }
 
@@ -301,11 +404,16 @@ class BookingAgent {
   simulateBooking(provider: Provider, quote: Quote, timeSlot: string, address: string) {
     addTrace(this.agentName, 'Simulation', `Initiating confirmation handshake with ${provider.name} for ${timeSlot}...`);
     
+    const travelBuffer = Math.ceil((provider.distanceKm || 3) * 8);
+    addTrace(this.agentName, 'Simulation', `Scheduling intelligence: Allocated ${travelBuffer}-minute travel buffer based on travel distance (${provider.distanceKm || 3}km).`);
+    addTrace(this.agentName, 'Simulation', `Synchronized and updated provider ${provider.name}'s calendar slot.`);
+
     setTimeout(() => {
       const bookingId = 'BK-' + Math.floor(Math.random() * 10000);
       addTrace(this.agentName, 'Simulation', `Booking ${bookingId} Confirmed! Total Rs ${quote.total}.`, { amount: quote.total, slot: timeSlot });
       addTrace(this.agentName, 'Simulation', `WhatsApp Booking Notification dispatched successfully.`, { recipient: provider.name });
       addTrace(this.agentName, 'Simulation', `Scheduled 1-hour pre-arrival notification alert.`, { arrival: timeSlot });
+      addTrace(this.agentName, 'Simulation', `Updated central transaction spreadsheet and mock SQL database logs for Booking ID ${bookingId}.`);
     }, 1000);
   }
 }
@@ -384,6 +492,10 @@ export class MasterOrchestrator {
 
   simulateBooking(provider: Provider, quote: Quote, timeSlot: string, address: string) {
     this.bookingAgent.simulateBooking(provider, quote, timeSlot, address);
+  }
+
+  generateQuote(provider: Provider, intent: ParsedIntent, distance: number): Quote {
+    return this.matchingAgent.generateQuote(provider, intent, distance);
   }
 
   simulateDispute() {

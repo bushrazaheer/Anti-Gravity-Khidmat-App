@@ -38,6 +38,7 @@ export interface ParsedIntent {
   isGreeting?: boolean;
   isThanks?: boolean;
   isOk?: boolean;
+  complexity?: 'basic' | 'intermediate' | 'complex';
 }
 
 export const parseIntentWithAI = async (userInput: string): Promise<ParsedIntent> => {
@@ -51,6 +52,8 @@ Analyze the user input (can be English, Urdu, or Roman Urdu).
 Identify the service requested. Map it to one of these EXACT categories if possible: "AC Repair", "Electrician", "Plumber", "Mechanic".
 If they say "i need plumber" or "plumber chahiye", the serviceType is "Plumber".
 
+Also classify the job complexity as "basic", "intermediate", or "complex" based on the task description (e.g. general checkup/cleaning = basic, standard repair/part change = intermediate, complete wiring/compressor change/major overhaul = complex).
+
 Return ONLY a raw JSON object. Do not use Markdown formatting, do not use \`\`\`json. Just the JSON.
 Schema:
 {
@@ -62,7 +65,8 @@ Schema:
   "confidenceScore": number (0-100),
   "needsClarification": boolean (true ONLY if you genuinely cannot guess the service type),
   "clarificationMessage": "string (ask politely in the user's language)",
-  "language": "string"
+  "language": "string",
+  "complexity": "basic|intermediate|complex"
 }
 
 Input: "${userInput}"

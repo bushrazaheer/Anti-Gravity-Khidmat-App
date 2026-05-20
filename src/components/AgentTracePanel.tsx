@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
-import { AgentTrace, subscribeToTraces } from '@/engine/AntigravityAgent';
+import { AgentTrace, subscribeToTraces, getTraces } from '@/engine/AntigravityAgent';
 
 export const AgentTracePanel = () => {
-  const [traces, setTraces] = useState<AgentTrace[]>([]);
+  const [traces, setTraces] = useState<AgentTrace[]>(getTraces());
   const [expanded, setExpanded] = useState(false);
   const heightAnim = useState(new Animated.Value(60))[0];
 
